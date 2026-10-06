@@ -29,7 +29,7 @@ public class Git {
         var hash = FileHasher.hashFile(path_to_add);
         var path = Path.of("./git/objects/" + hash);
 
-        var hashes_files = Files.readAllLines(Path.of("./git/index")).stream().map(line -> {
+        var hashes_files = Files.readAllLines(Path.of("./git/INDEX")).stream().map(line -> {
             var split = line.split(" ");
             if (split.length != 2) {
                 System.err.println("error parsing index");
@@ -70,10 +70,10 @@ public class Git {
 
         if (Files.isDirectory(path) && Files.isDirectory(objects) && Files.exists(index)
                 && Files.exists(head))
-            System.out.println("Reitialized Gitty repository in " + currentPath);
+            System.out.println("Git Repository Already Exists");
         else {
             Files.createDirectories(path);
-            System.out.println("Initialized empty Gitty repository in " + currentPath);
+            System.out.println("Git Repository Created");
             Files.createDirectories(objects);
             Files.createFile(index);
             Files.createFile(head);
