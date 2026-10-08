@@ -37,14 +37,14 @@ public class Verify {
         }
         Path testPath = Path.of("test.txt");
         try {
-            git.add(testPath.toString());
+            git.addFile(testPath.toString());
         } catch (IOException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();
         }
         Path testPath1 = Path.of("test1.txt");
         try {
-            git.add(testPath1.toString());
+            git.addFile(testPath1.toString());
         } catch (IOException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();

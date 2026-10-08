@@ -1,4 +1,8 @@
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
+import java.io.Reader;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -17,7 +21,7 @@ public class Git {
                     System.out.println("add needs parameter");
                     return;
                 }
-                add(args[1]);
+                addFile(args[1]);
                 break;
             case "commit":
                 break;
@@ -25,7 +29,7 @@ public class Git {
         System.out.println();
     }
 
-    void add(String path_to_add) throws IOException {
+    void addFile(String path_to_add) throws IOException {
         var hash = FileHasher.hashFile(path_to_add);
         var path = Path.of("./git/objects/" + hash);
 
@@ -78,5 +82,78 @@ public class Git {
             Files.createFile(index);
             Files.createFile(head);
         }
+    }
+
+    // generates a tree based upon the Path of a directory
+    public String generateTree(String pathToAdd) {
+        // checks if pathToAdd is file, if it is then it adds it like a file from before
+        // project
+        Path pathToUse = Path.of(pathToAdd);
+        if (!pathToUse.toFile().isDirectory()) {
+            try {
+                String hash = FileHasher.hashFile(pathToAdd);
+                FileWriter fw = new FileWriter("./git/objects/" + hash);
+                fw.write(Files.readString(pathToUse));
+                fw.close();
+                return hash;
+            } catch (IOException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            }
+        }
+        // turns the contents in folder into array
+
+        File folder = new File(pathToAdd);
+        File[] filesInFolder = folder.listFiles();
+        Path pathToObjects = Path.of("./git/objects/");
+        StringBuilder contentsOfTree = new StringBuilder();
+        if (filesInFolder != null) {
+            for (int i = 0; i < filesInFolder.length; i++) {
+                if (!filesInFolder[i].isDirectory()) {
+                    try {
+                        // finds file hash of the file
+                        String fileHash = FileHasher.hashFile(filesInFolder[i].getPath().toString());
+                        FileWriter blobWriter = new FileWriter("./git/objects/" + fileHash);
+                        blobWriter.write(Files.readString(filesInFolder[i].toPath()));
+                        blobWriter.close();
+                        // writes line for file
+                        contentsOfTree.append("blob " + fileHash + " " + filesInFolder[i].getName() + "\n");
+                    } catch (IOException e) {
+                        // TODO Auto-generated catch block
+                        e.printStackTrace();
+                    }
+                } else {
+                    // finds file hash of tree
+                    String hashOfSmallerTree = generateTree(filesInFolder[i].getPath().toString());
+                    contentsOfTree.append("tree " + hashOfSmallerTree + " " + filesInFolder[i].getName() + "\n");
+                }
+            }
+
+        }
+
+        try {
+            String stringContents = contentsOfTree.toString();
+            String hash = FileHasher.hashString(stringContents);
+
+            // Write the tree file using Java's built-in Files utility
+            Files.writeString(Path.of("./git/objects/" + hash), stringContents);
+
+            return hash;
+        } catch (IOException e) {
+            e.printStackTrace();
+            return null;
+        }
+
+    }
+
+    public String createTreeFromIndex(String pathToWorkingList) {
+        // build and sort working list
+        Path path = Path.of(pathToWorkingList);
+        File file = path.toFile();
+
+        BufferedReader br = new BufferedReader();
+        br.readAllLines();
+
+        return "";
     }
 }
